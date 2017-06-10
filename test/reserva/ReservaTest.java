@@ -1,7 +1,5 @@
 package reserva;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
 
 public class ReservaTest {
@@ -12,7 +10,8 @@ public class ReservaTest {
 	@Test
 	public void testEnunciado() {
 		Reserva reserva = new Reserva(archivoIn + "00_Enunciado.in");
-		reserva.escribirVector();
+		reserva.calcula();
+		reserva.escribirCantidad();
 	}
 
 }
