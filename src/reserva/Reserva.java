@@ -8,15 +8,15 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 import java.util.Stack;
 
+import com.sun.org.apache.bcel.internal.generic.ReturnaddressType;
+
 public class Reserva {
 	// Usar DFS
 	private int cantidadMiradores;
 	private int cantidadTramos;
-	private int cantidadCaminos = 0;
-	private Stack<Integer> pila;
-	private int[] tratado;
 	private int[] inicio;
 	private int[] destino;
+	private int[] valores;
 
 	public Reserva(String path) {
 		try {
@@ -28,31 +28,37 @@ public class Reserva {
 	}
 
 	public void calcula() {
-		boolean cambio = false;
-		this.pila.add(this.inicio[0]);
-		this.tratado[0] = 1;
+		int cantidadParaValuar = this.cantidadMiradores - 1;
+		this.valores[0] = 1;
 
-		while (!pila.isEmpty()) {
-			int i = 0;
-			while (!pila.isEmpty() && i < this.cantidadTramos && this.pila.lastElement() != this.cantidadMiradores) {
-				if (this.inicio[i] == this.pila.lastElement() && this.tratado[this.destino[i] - 1] == 0) {
-					this.pila.add(this.destino[i]);
-					this.tratado[this.destino[i] - 1] = 1;
-					cambio = true;
+		while (cantidadParaValuar > 0) {
+			int i = 1;
+			while (cantidadParaValuar > 0 && i < this.cantidadMiradores) {
+				if (this.valores[i] == 0 && puedoValuar(i + 1)) {
+					this.valores[i] = sumaPadres(i + 1);
+					cantidadParaValuar--;
 				}
-
+				
 				i++;
 			}
-			if (!cambio) {
-				this.pila.pop();
-				this.tratado[this.cantidadMiradores - 1] = 0;
-			}
-			if (!pila.isEmpty() && this.pila.lastElement() == this.cantidadMiradores) {
-				this.cantidadCaminos++;
-				this.pila.pop();
-			}
-			cambio = false;
 		}
+	}
+
+	public boolean puedoValuar(int m) {
+		for (int i = 0; i < this.cantidadTramos; i++) {
+			if (this.destino[i] == m && this.valores[this.inicio[i] - 1] == 0)
+				return false;
+		}
+		return true;
+	}
+
+	public int sumaPadres(int m) {
+		int suma = 0;
+		for (int i = 0; i < this.cantidadTramos; i++) {
+			if (this.destino[i] == m && this.valores[this.inicio[i] - 1] != 0)
+				suma += this.valores[this.inicio[i] - 1];
+		}
+		return suma;
 	}
 
 	public void leerArchivo(String path) {
@@ -61,10 +67,9 @@ public class Reserva {
 			sc = new Scanner(new File(path));
 			this.cantidadMiradores = sc.nextInt();
 			this.cantidadTramos = sc.nextInt();
-			this.tratado = new int[this.cantidadMiradores];
 			this.inicio = new int[this.cantidadTramos];
 			this.destino = new int[this.cantidadTramos];
-			this.pila = new Stack<Integer>();
+			this.valores = new int[this.cantidadMiradores];
 			for (int i = 0; i < this.cantidadTramos; i++) {
 				this.inicio[i] = sc.nextInt();
 				this.destino[i] = sc.nextInt();
@@ -77,21 +82,16 @@ public class Reserva {
 		}
 		sc.close();
 	}
-
-	public void escribirVector() {
-		for (int i = 0; i < this.cantidadTramos; i++)
-			System.out.println(this.inicio[i] + " " + this.destino[i]);
-	}
-
-	public void escribirCantidad() {
-		System.out.println(this.cantidadCaminos);
+	
+	public void escribirFinal(){
+		System.out.println(this.valores[this.cantidadMiradores - 1]);
 	}
 
 	public void grabarArchivo(String path) {
 		PrintWriter salida;
 		try {
 			salida = new PrintWriter(new FileWriter(path));
-			salida.println(this.cantidadCaminos);
+			salida.println(this.valores[this.cantidadMiradores - 1]);
 
 			salida.close();
 		} catch (IOException e) {

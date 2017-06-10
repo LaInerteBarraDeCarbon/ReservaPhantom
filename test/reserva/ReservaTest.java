@@ -11,7 +11,7 @@ public class ReservaTest {
 	public void testEnunciado() {
 		Reserva reserva = new Reserva(archivoIn + "00_Enunciado.in");
 		reserva.calcula();
-		reserva.escribirCantidad();
+		reserva.grabarArchivo(archivoOut + "00_Enunciado.out");
 	}
 
 }
